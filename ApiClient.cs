@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
+using System.Text.Json.Nodes;
 using RestSharp;
+using Newtonsoft.Json;
 
 namespace CreateUsersNeowit
 {
@@ -27,6 +29,18 @@ namespace CreateUsersNeowit
             var response = await client.PostAsync<Token>(request);
             return response.AccessToken;
 
+        }
+
+        public List<User> GetUsers(string resource, string token)
+        {
+            var client = new RestClient(_baseUrl);
+
+            var request = new RestRequest(resource, Method.Get);
+            request.AddHeader("Authorization", "Bearer " + token);
+
+            var response = client.ExecuteGetAsync(request);
+            var users = JsonConvert.DeserializeObject<Root>(response.Result.Content);
+            return users.Users;
         }
 
         public async Task<User> PostDeviceRequest(string resource, User jsonBody, string token)

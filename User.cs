@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace CreateUsersNeowit
@@ -36,7 +37,7 @@ namespace CreateUsersNeowit
                 importedUsers.Add(new User
                 {
                     Name = row[0],
-                    Email = row[1],
+                    Email = row[1].ToLower(),
                     IdpId = "epgvYfC8K9BSD9Rukfehgz",
                     Role = "ROLE_MEMBER"
                 });
@@ -58,13 +59,25 @@ namespace CreateUsersNeowit
                 Remember = true
             }).Result;
 
+            var userListInPlatform = apiClient.GetUsers("user/v1/user?orgId=tCjvD73dSUeLyC7JGzxnmj", token);
+
+
+
             foreach (var user in importedUsers)
             {
-                Console.WriteLine("importing user {0} of {1}", x, importedUsers.Count);
-                var ret = apiClient.PostDeviceRequest("user/v1/user?orgId=tCjvD73dSUeLyC7JGzxnmj", user, token);
-                Console.WriteLine("Success: {0} added:" , ret.Result.Email);
+                if (!userListInPlatform.Any(u => u.Email == user.Email))
+                {
+                    Console.WriteLine("importing user {0} of {1}", x, importedUsers.Count);
+                    var ret = apiClient.PostDeviceRequest("user/v1/user?orgId=tCjvD73dSUeLyC7JGzxnmj", user, token);
+                    Console.WriteLine("Success: {0} added:" , ret.Result.Email);
+                }
+                else
+                {
+                    Console.WriteLine("User: {0} already exits in platform", user.Name);
+                }
+
                 x = x + 1;
-                 Task.Delay(2000);
+                Task.Delay(2000);
             }
 
             return null;
