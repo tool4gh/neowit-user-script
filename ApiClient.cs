@@ -46,14 +46,13 @@ namespace CreateUsersNeowit
         public async Task<User> PostDeviceRequest(string resource, User jsonBody, string token)
         {
             var client = new RestClient(_baseUrl);
-            
+
             var request = new RestRequest(resource, Method.Post);
             request.AddJsonBody<User>(jsonBody);
             request.AddHeader("Authorization", "Bearer " + token);
 
             var response = await client.PostAsync<User>(request);
             //var response = await client.ExecutePostAsync<Device>(request);
-
 
             return response;
         }

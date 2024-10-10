@@ -3,8 +3,12 @@ using CreateUsersNeowit;
 
 Console.WriteLine("Neowit Bulk Import of Users.");
 Console.WriteLine("Click to Continue");
-var hugo = Console.ReadLine();
+Console.ReadLine();
+System.Console.WriteLine("Please input the org you want to add users to:");
+var orgId = Console.ReadLine();
+
+System.Console.WriteLine(orgId);
 
 var test = new User();
 
-test.ReadUsersFromFileAsync();
+test.ReadUsersFromFileAsync(orgId);

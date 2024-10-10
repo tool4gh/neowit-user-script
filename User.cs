@@ -21,10 +21,10 @@ namespace CreateUsersNeowit
         {
         }
 
-        public List<User> ReadUsersFromFileAsync()
+        public List<User> ReadUsersFromFileAsync(string orgId)
         {
-            string filePath = "/Users/hugofuhlendorff/Documents/text.csv";
-           // / Users / hugofuhlendorff / Documents / text.csv
+            string filePath = "/Users/hugofuhlendorff/Documents/SandvikaNeowit.csv";
+            // / Users / hugofuhlendorff / Documents / text.csv
             var sr = new StreamReader(filePath);
             var importedUsers = new List<User>();
             string line;
@@ -32,52 +32,59 @@ namespace CreateUsersNeowit
 
             while ((line = sr.ReadLine()) != null)
             {
-                row = line.Split(";");
+                row = line.Split(",");
 
                 importedUsers.Add(new User
                 {
                     Name = row[0],
                     Email = row[1].ToLower(),
-                    IdpId = "epgvYfC8K9BSD9Rukfehgz",
+                    //IdpId = "epgvYfC8K9BSD9Rukfehgz",
                     Role = "ROLE_MEMBER"
                 });
 
-               
+
             }
             importedUsers.RemoveAt(0);
             Console.WriteLine("I found {0} users in the file: ", importedUsers.Count);
-            Console.WriteLine("Are you ready to proceed?");
-            Console.ReadLine();
-            var apiClient = new ApiClient();
-            int x = 1;
-            var token = apiClient.GetBearerToken(new User
+            System.Console.WriteLine($"Will write users to this org: {orgId}");
+            Console.WriteLine("Are you ready to proceed? Y/N");
+            var descicion = Console.ReadLine();
+
+            if (descicion == "Y")
             {
-                Email = "hugo@neowit.io",
-                Password = "tbp*nbq.uaj8KRK@xfz",
-                Device = "Hugo",
-                Location = "https://app.neowit.io/locations",
-                Remember = true
-            }).Result;
-
-            var userListInPlatform = apiClient.GetUsers("user/v1/user?orgId=tCjvD73dSUeLyC7JGzxnmj", token);
-
-
-
-            foreach (var user in importedUsers)
-            {
-                if (!userListInPlatform.Any(u => u.Email == user.Email))
+                var apiClient = new ApiClient();
+                int x = 1;
+                var token = apiClient.GetBearerToken(new User
                 {
-                    Console.WriteLine("importing user {0} of {1}", x, importedUsers.Count);
-                    var ret = apiClient.PostDeviceRequest("user/v1/user?orgId=tCjvD73dSUeLyC7JGzxnmj", user, token);
-                    Console.WriteLine("Success: {0} added:" , ret.Result.Email);
-                }
-                else
-                {
-                    Console.WriteLine("User: {0} already exits in platform", user.Name);
-                }
+                    Email = "hugo@neowit.io",
+                    Password = "tbp*nbq.uaj8KRK@xfz",
+                    Device = "Hugo",
+                    Location = "https://app.neowit.io/locations",
+                    Remember = true
+                }).Result;
 
-                x = x + 1;
-                Task.Delay(2000);
+                //var userListInPlatform = apiClient.GetUsers("user/v1/user?orgId=tCjvD73dSUeLyC7JGzxnmj", token);
+                var userListInPlatform = apiClient.GetUsers($"user/v1/user?orgId={orgId}", token);
+
+
+
+                foreach (var user in importedUsers)
+                {
+                    if (!userListInPlatform.Any(u => u.Email == user.Email))
+                    {
+                        Console.WriteLine("importing user {0} of {1}", x, importedUsers.Count);
+                        var ret = apiClient.PostDeviceRequest($"user/v1/user?orgId={orgId}", user, token);
+                        Console.WriteLine("Success: {0} added:", ret.Result.Email);
+                    }
+                    else
+                    {
+                        Console.WriteLine("User: {0} already exits in platform", user.Name);
+                    }
+
+                    x++;
+                    Task.Delay(2000);
+                }
+                return null;
             }
 
             return null;
