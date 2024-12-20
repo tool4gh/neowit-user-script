@@ -1,14 +1,28 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using CreateUsersNeowit;
+using Spectre.Console;
 
-Console.WriteLine("Neowit Bulk Import of Users.");
-Console.WriteLine("Click to Continue");
-Console.ReadLine();
-System.Console.WriteLine("Please input the org you want to add users to:");
-var orgId = Console.ReadLine();
+AnsiConsole.MarkupLine("[red]Neowit Bulk Import of Users[/]");
+var confirmation = AnsiConsole.Prompt(
+    new TextPrompt<bool>("Are you ready to proceed?")
+        .AddChoice(true)
+        .AddChoice(false)
+        .DefaultValue(true)
+        .WithConverter(choice => choice ? "y" : "n"));
 
-System.Console.WriteLine(orgId);
+if (!confirmation)
+{
+    return;
+}
 
+var orgId = AnsiConsole.Prompt(new TextPrompt<string>("Please provide the [green]org[/] you want to add users to?"));
+
+var fileConfirm = AnsiConsole.Prompt(
+    new TextPrompt<bool>("Have you placed the [red bold underline]importUsers.csv[/] file in the same folder as this program?")
+        .AddChoice(true)
+        .AddChoice(false)
+        .DefaultValue(true)
+        .WithConverter(choice => choice ? "y" : "n"));
 var test = new User();
 
-test.ReadUsersFromFileAsync(orgId);
+await test.ReadUsersFromFileAsync(orgId);
